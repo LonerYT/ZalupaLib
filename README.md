@@ -41,8 +41,13 @@ local Tab = Window:CreateTab({
 - 🔴 Red - Red theme
 - 🔵 Blue - Blue theme
 ## Section
+### Uncondensed:
 ```lua
 Tab:CreateSection("Section Name")
+```
+### Condensed:
+```lua
+local Tab = Window:CreateTab({Name = "Main", Icon = ""})
 ```
 ## Toggle
 ```lua
