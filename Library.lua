@@ -99,6 +99,32 @@ local function Ripple(button, x, y)
 	end)
 end
 
+local function ApplyTheme(elements, theme)
+	for _, element in pairs(elements) do
+		if element.Background then
+			element.Background.BackgroundColor3 = theme.Background
+		end
+		if element.Secondary then
+			element.Secondary.BackgroundColor3 = theme.Secondary
+		end
+		if element.Tertiary then
+			element.Tertiary.BackgroundColor3 = theme.Tertiary
+		end
+		if element.Text then
+			element.Text.TextColor3 = theme.Text
+		end
+		if element.TextDark then
+			element.TextDark.TextColor3 = theme.TextDark
+		end
+		if element.Accent then
+			element.Accent.BackgroundColor3 = theme.Accent
+		end
+		if element.Stroke then
+			element.Stroke.Color = theme.Stroke
+		end
+	end
+end
+
 function Library:CreateWindow(config)
 	config = config or {}
 	local title = config.Title or "Zalupa Scripts"
@@ -115,7 +141,9 @@ function Library:CreateWindow(config)
 	Window.Tabs = {}
 	Window.CurrentTab = nil
 	Window.Theme = Theme
+	Window.ThemeName = themeName
 	Window.Minimized = false
+	Window.Elements = {}
 	
 	if CoreGui:FindFirstChild("ZalupaUI") then
 		CoreGui:FindFirstChild("ZalupaUI"):Destroy()
@@ -129,12 +157,6 @@ function Library:CreateWindow(config)
 	})
 	
 	Window.ScreenGui = ScreenGui
-	
-	local Blur = Create("BlurEffect", {
-		Name = "ZalupaBlur",
-		Size = 0,
-		Parent = game:GetService("Lighting")
-	})
 	
 	local NotifContainer = Create("Frame", {
 		Name = "Notifications",
@@ -531,18 +553,28 @@ function Library:CreateWindow(config)
 		Parent = Pages
 	})
 	
-	Tween(Blur, 0.3, {Size = 10})
 	Shadow.ImageTransparency = 1
 	Tween(Shadow, 0.4, {ImageTransparency = 0.5})
 	Tween(Main, 0.5, {Size = UDim2.new(0, 550, 0, 380)}, Enum.EasingStyle.Back)
 	
-	local dragging, dragStart, startPos = false, nil, nil
+	-- Wobbly Windows Effect
+	local dragging = false
+	local dragStart = nil
+	local startPos = nil
+	local velocity = Vector2.new(0, 0)
+	local lastMousePos = Vector2.new(0, 0)
+	local wobbleRotation = 0
+	local wobbleScale = Vector2.new(1, 1)
+	local targetRotation = 0
+	local targetScaleX = 1
+	local targetScaleY = 1
 	
 	TitleBar.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			dragStart = input.Position
 			startPos = Main.Position
+			lastMousePos = Vector2.new(input.Position.X, input.Position.Y)
 		end
 	end)
 	
@@ -558,6 +590,39 @@ function Library:CreateWindow(config)
 			local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 			Main.Position = newPos
 			Shadow.Position = newPos
+			
+			local currentMousePos = Vector2.new(input.Position.X, input.Position.Y)
+			velocity = currentMousePos - lastMousePos
+			lastMousePos = currentMousePos
+			
+			targetRotation = math.clamp(velocity.X * 0.3, -8, 8)
+			targetScaleX = math.clamp(1 + math.abs(velocity.X) * 0.002, 0.95, 1.05)
+			targetScaleY = math.clamp(1 - math.abs(velocity.X) * 0.001, 0.95, 1.05)
+		end
+	end)
+	
+	RunService.RenderStepped:Connect(function(dt)
+		if not dragging then
+			targetRotation = 0
+			targetScaleX = 1
+			targetScaleY = 1
+		end
+		
+		local lerpSpeed = dragging and 15 or 8
+		wobbleRotation = wobbleRotation + (targetRotation - wobbleRotation) * math.min(dt * lerpSpeed, 1)
+		wobbleScale = Vector2.new(
+			wobbleScale.X + (targetScaleX - wobbleScale.X) * math.min(dt * lerpSpeed, 1),
+			wobbleScale.Y + (targetScaleY - wobbleScale.Y) * math.min(dt * lerpSpeed, 1)
+		)
+		
+		Main.Rotation = wobbleRotation
+		
+		if not dragging and (math.abs(wobbleRotation) > 0.01 or math.abs(wobbleScale.X - 1) > 0.001) then
+			wobbleRotation = wobbleRotation * 0.85
+			local bounceX = (wobbleScale.X - 1) * -0.3
+			local bounceY = (wobbleScale.Y - 1) * -0.3
+			targetScaleX = 1 + bounceX
+			targetScaleY = 1 + bounceY
 		end
 	end)
 	
@@ -586,7 +651,6 @@ function Library:CreateWindow(config)
 		if Window.Minimized then
 			Tween(Main, 0.3, {Size = UDim2.new(0, 550, 0, 50)})
 			Tween(Shadow, 0.3, {Size = UDim2.new(0, 600, 0, 100)})
-			Tween(Blur, 0.3, {Size = 5})
 			Content.Visible = false
 			Footer.Visible = false
 		else
@@ -594,16 +658,13 @@ function Library:CreateWindow(config)
 			Footer.Visible = true
 			Tween(Main, 0.3, {Size = originalSize})
 			Tween(Shadow, 0.3, {Size = UDim2.new(0, 600, 0, 430)})
-			Tween(Blur, 0.3, {Size = 10})
 		end
 	end)
 	
 	CloseBtn.MouseButton1Click:Connect(function()
-		Tween(Blur, 0.3, {Size = 0})
 		Tween(Main, 0.3, {Size = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Back, Enum.EasingDirection.In)
 		Tween(Shadow, 0.3, {ImageTransparency = 1})
 		task.wait(0.35)
-		Blur:Destroy()
 		ScreenGui:Destroy()
 	end)
 	
@@ -748,7 +809,7 @@ function Library:CreateWindow(config)
 		
 		table.insert(Window.Tabs, Tab)
 		
-		function Tab:CreateSection(title)
+		function Tab:CreateSection(sectionTitle)
 			local Section = Create("Frame", {
 				Size = UDim2.new(1, 0, 0, 30),
 				BackgroundTransparency = 1,
@@ -766,7 +827,7 @@ function Library:CreateWindow(config)
 				Size = UDim2.new(0.5, 0, 1, 0),
 				Position = UDim2.new(0.25, 0, 0, 0),
 				BackgroundTransparency = 1,
-				Text = title,
+				Text = sectionTitle,
 				TextColor3 = Theme.TextDark,
 				TextSize = 11,
 				Font = Enum.Font.GothamBold,
@@ -869,6 +930,10 @@ function Library:CreateWindow(config)
 			
 			local element = {Name = toggleName, Container = Container, Type = "Toggle"}
 			table.insert(Tab.Elements, element)
+			
+			if default then
+				callback(true)
+			end
 			
 			return {
 				Set = function(value)
@@ -1571,7 +1636,7 @@ function Library:CreateWindow(config)
 	
 	function Library:Notify(config)
 		config = config or {}
-		local title = config.Title or "Notification"
+		local notifTitle = config.Title or "Notification"
 		local text = config.Text or ""
 		local duration = config.Duration or 3
 		
@@ -1598,7 +1663,7 @@ function Library:CreateWindow(config)
 			Size = UDim2.new(1, -20, 0, 20),
 			Position = UDim2.new(0, 10, 0, 8),
 			BackgroundTransparency = 1,
-			Text = title,
+			Text = notifTitle,
 			TextColor3 = Theme.Accent,
 			TextSize = 14,
 			Font = Enum.Font.GothamBold,
@@ -1636,20 +1701,10 @@ function Library:CreateWindow(config)
 		end)
 	end
 	
-	function Window:SetTheme(themeName)
-		local newTheme = Themes[themeName]
-		if newTheme then
-			Theme = newTheme
-			Window.Theme = Theme
-		end
-	end
-	
 	function Window:Destroy()
-		Tween(Blur, 0.3, {Size = 0})
 		Tween(Main, 0.3, {Size = UDim2.new(0, 0, 0, 0)})
 		Tween(Shadow, 0.3, {ImageTransparency = 1})
 		task.wait(0.35)
-		Blur:Destroy()
 		ScreenGui:Destroy()
 	end
 	
