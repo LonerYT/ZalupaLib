@@ -154,3 +154,12 @@ Library:Notify({
 -- Destroy window
 Window:Destroy()
 ```
+### ✨ Features
+- 🎨 5 built-in themes
+- 🌊 Animated gradient background
+- ✨ Floating particles
+- 💫 Glowing border animation
+- 🔍 Search through elements
+- 📊 FPS and Ping in footer
+- 🌀 Ripple effect on buttons
+- 🎭 Smooth animations
