@@ -99,32 +99,6 @@ local function Ripple(button, x, y)
 	end)
 end
 
-local function ApplyTheme(elements, theme)
-	for _, element in pairs(elements) do
-		if element.Background then
-			element.Background.BackgroundColor3 = theme.Background
-		end
-		if element.Secondary then
-			element.Secondary.BackgroundColor3 = theme.Secondary
-		end
-		if element.Tertiary then
-			element.Tertiary.BackgroundColor3 = theme.Tertiary
-		end
-		if element.Text then
-			element.Text.TextColor3 = theme.Text
-		end
-		if element.TextDark then
-			element.TextDark.TextColor3 = theme.TextDark
-		end
-		if element.Accent then
-			element.Accent.BackgroundColor3 = theme.Accent
-		end
-		if element.Stroke then
-			element.Stroke.Color = theme.Stroke
-		end
-	end
-end
-
 function Library:CreateWindow(config)
 	config = config or {}
 	local title = config.Title or "Zalupa Scripts"
@@ -141,9 +115,7 @@ function Library:CreateWindow(config)
 	Window.Tabs = {}
 	Window.CurrentTab = nil
 	Window.Theme = Theme
-	Window.ThemeName = themeName
 	Window.Minimized = false
-	Window.Elements = {}
 	
 	if CoreGui:FindFirstChild("ZalupaUI") then
 		CoreGui:FindFirstChild("ZalupaUI"):Destroy()
@@ -557,24 +529,15 @@ function Library:CreateWindow(config)
 	Tween(Shadow, 0.4, {ImageTransparency = 0.5})
 	Tween(Main, 0.5, {Size = UDim2.new(0, 550, 0, 380)}, Enum.EasingStyle.Back)
 	
-	-- Wobbly Windows Effect
 	local dragging = false
 	local dragStart = nil
 	local startPos = nil
-	local velocity = Vector2.new(0, 0)
-	local lastMousePos = Vector2.new(0, 0)
-	local wobbleRotation = 0
-	local wobbleScale = Vector2.new(1, 1)
-	local targetRotation = 0
-	local targetScaleX = 1
-	local targetScaleY = 1
 	
 	TitleBar.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			dragging = true
 			dragStart = input.Position
 			startPos = Main.Position
-			lastMousePos = Vector2.new(input.Position.X, input.Position.Y)
 		end
 	end)
 	
@@ -590,39 +553,6 @@ function Library:CreateWindow(config)
 			local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 			Main.Position = newPos
 			Shadow.Position = newPos
-			
-			local currentMousePos = Vector2.new(input.Position.X, input.Position.Y)
-			velocity = currentMousePos - lastMousePos
-			lastMousePos = currentMousePos
-			
-			targetRotation = math.clamp(velocity.X * 0.3, -8, 8)
-			targetScaleX = math.clamp(1 + math.abs(velocity.X) * 0.002, 0.95, 1.05)
-			targetScaleY = math.clamp(1 - math.abs(velocity.X) * 0.001, 0.95, 1.05)
-		end
-	end)
-	
-	RunService.RenderStepped:Connect(function(dt)
-		if not dragging then
-			targetRotation = 0
-			targetScaleX = 1
-			targetScaleY = 1
-		end
-		
-		local lerpSpeed = dragging and 15 or 8
-		wobbleRotation = wobbleRotation + (targetRotation - wobbleRotation) * math.min(dt * lerpSpeed, 1)
-		wobbleScale = Vector2.new(
-			wobbleScale.X + (targetScaleX - wobbleScale.X) * math.min(dt * lerpSpeed, 1),
-			wobbleScale.Y + (targetScaleY - wobbleScale.Y) * math.min(dt * lerpSpeed, 1)
-		)
-		
-		Main.Rotation = wobbleRotation
-		
-		if not dragging and (math.abs(wobbleRotation) > 0.01 or math.abs(wobbleScale.X - 1) > 0.001) then
-			wobbleRotation = wobbleRotation * 0.85
-			local bounceX = (wobbleScale.X - 1) * -0.3
-			local bounceY = (wobbleScale.Y - 1) * -0.3
-			targetScaleX = 1 + bounceX
-			targetScaleY = 1 + bounceY
 		end
 	end)
 	
@@ -1480,89 +1410,17 @@ function Library:CreateWindow(config)
 				Parent = Container
 			})
 			
-			local ColorGradient = Create("Frame", {
-				Size = UDim2.new(1, -40, 0, 80),
-				BackgroundColor3 = Color3.fromRGB(255, 0, 0),
-				Parent = PickerContainer
-			})
-			
-			Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = ColorGradient})
-			
-			Create("UIGradient", {
-				Color = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-				}),
-				Transparency = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 0),
-					NumberSequenceKeypoint.new(1, 1)
-				}),
-				Parent = ColorGradient
-			})
-			
-			local BlackGradient = Create("Frame", {
-				Size = UDim2.new(1, 0, 1, 0),
-				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-				Parent = ColorGradient
-			})
-			
-			Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = BlackGradient})
-			
-			Create("UIGradient", {
-				Color = ColorSequence.new(Color3.fromRGB(0, 0, 0)),
-				Transparency = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 1),
-					NumberSequenceKeypoint.new(1, 0)
-				}),
-				Rotation = 90,
-				Parent = BlackGradient
-			})
-			
-			local HueSlider = Create("Frame", {
-				Size = UDim2.new(0, 25, 0, 80),
-				Position = UDim2.new(1, -30, 0, 0),
-				Parent = PickerContainer
-			})
-			
-			Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = HueSlider})
-			
-			Create("UIGradient", {
-				Color = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-					ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-					ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-					ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
-					ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
-				}),
-				Rotation = 90,
-				Parent = HueSlider
-			})
-			
 			local RGBContainer = Create("Frame", {
 				Size = UDim2.new(1, 0, 0, 30),
-				Position = UDim2.new(0, 0, 0, 90),
+				Position = UDim2.new(0, 0, 0, 0),
 				BackgroundTransparency = 1,
 				Parent = PickerContainer
 			})
 			
-			local function createRGBInput(label, posX)
-				local input = Create("TextBox", {
-					Size = UDim2.new(0, 50, 0, 25),
-					Position = UDim2.new(0, posX, 0, 0),
-					BackgroundColor3 = Theme.Secondary,
-					Text = "255",
-					TextColor3 = Theme.Text,
-					TextSize = 11,
-					Font = Enum.Font.Gotham,
-					Parent = RGBContainer
-				})
-				Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = input})
-				
+			local function createRGBInput(label, posX, defaultVal)
 				Create("TextLabel", {
 					Size = UDim2.new(0, 15, 1, 0),
-					Position = UDim2.new(0, posX - 18, 0, 0),
+					Position = UDim2.new(0, posX, 0, 0),
 					BackgroundTransparency = 1,
 					Text = label,
 					TextColor3 = Theme.TextDark,
@@ -1571,16 +1429,24 @@ function Library:CreateWindow(config)
 					Parent = RGBContainer
 				})
 				
+				local input = Create("TextBox", {
+					Size = UDim2.new(0, 50, 0, 25),
+					Position = UDim2.new(0, posX + 18, 0, 2),
+					BackgroundColor3 = Theme.Secondary,
+					Text = tostring(defaultVal),
+					TextColor3 = Theme.Text,
+					TextSize = 11,
+					Font = Enum.Font.Gotham,
+					Parent = RGBContainer
+				})
+				Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = input})
+				
 				return input
 			end
 			
-			local RInput = createRGBInput("R", 20)
-			local GInput = createRGBInput("G", 90)
-			local BInput = createRGBInput("B", 160)
-			
-			RInput.Text = tostring(math.floor(currentColor.R * 255))
-			GInput.Text = tostring(math.floor(currentColor.G * 255))
-			BInput.Text = tostring(math.floor(currentColor.B * 255))
+			local RInput = createRGBInput("R", 0, math.floor(currentColor.R * 255))
+			local GInput = createRGBInput("G", 80, math.floor(currentColor.G * 255))
+			local BInput = createRGBInput("B", 160, math.floor(currentColor.B * 255))
 			
 			local function updateColor()
 				local r = math.clamp(tonumber(RInput.Text) or 255, 0, 255)
@@ -1607,7 +1473,7 @@ function Library:CreateWindow(config)
 				PickerContainer.Visible = isOpen
 				
 				if isOpen then
-					Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 175)})
+					Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 100)})
 				else
 					Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 45)})
 				end
@@ -1649,15 +1515,6 @@ function Library:CreateWindow(config)
 		
 		Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = Notif})
 		Create("UIStroke", {Color = Theme.Accent, Thickness = 1, Transparency = 0.5, Parent = Notif})
-		
-		Create("UIGradient", {
-			Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, Theme.Tertiary),
-				ColorSequenceKeypoint.new(1, Theme.Secondary)
-			}),
-			Rotation = 90,
-			Parent = Notif
-		})
 		
 		Create("TextLabel", {
 			Size = UDim2.new(1, -20, 0, 20),
@@ -1702,7 +1559,7 @@ function Library:CreateWindow(config)
 	end
 	
 	function Window:Destroy()
-		Tween(Main, 0.3, {Size = UDim2.new(0, 0, 0, 0)})
+		Tween(Main, 0.3, {Size = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Back, Enum.EasingDirection.In)
 		Tween(Shadow, 0.3, {ImageTransparency = 1})
 		task.wait(0.35)
 		ScreenGui:Destroy()
