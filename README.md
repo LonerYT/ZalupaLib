@@ -44,7 +44,6 @@ local Tab = Window:CreateTab({Name = "Main", Icon = ""})
 ```
 ## 🧩 Elements
 ## Section
-### Uncondensed:
 ```lua
 Tab:CreateSection("Section Name")
 ```
