@@ -34,6 +34,10 @@ local Tab = Window:CreateTab({
     Icon = "" -- rbxassetid:// or empty
 })
 ```
+### Condensed:
+```lua
+local Tab = Window:CreateTab({Name = "Main", Icon = ""})
+```
 ## 🧩 Elements
 - ⚫ Dark - Default dark theme
 - ⚪ Light - Light theme
@@ -44,10 +48,6 @@ local Tab = Window:CreateTab({
 ### Uncondensed:
 ```lua
 Tab:CreateSection("Section Name")
-```
-### Condensed:
-```lua
-local Tab = Window:CreateTab({Name = "Main", Icon = ""})
 ```
 ## Toggle
 ### Uncondensed:
