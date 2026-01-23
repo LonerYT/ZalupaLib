@@ -11,7 +11,7 @@ Beautiful UI library for Roblox scripts
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/LonerYT/ZalupaLib/main/Library.lua"))()
 ```
-## Creating Window
+## 🪟 Creating Window
 ```lua
 local Window = Library:CreateWindow({
     Title = "Script Name",
