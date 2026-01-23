@@ -26,7 +26,11 @@ local Window = Library:CreateWindow({
 local Window = Library:CreateWindow({Title = "Script Name", Subtitle = "v1.0", Theme = "Dark"})
 ```
 ## 🎨 Themes
-
+- ⚫ Dark - Default dark theme
+- ⚪ Light - Light theme
+- 🟣 Purple - Purple theme
+- 🔴 Red - Red theme
+- 🔵 Blue - Blue theme
 ## 📑 Creating Tab
 ```lua
 local Tab = Window:CreateTab({
@@ -39,11 +43,6 @@ local Tab = Window:CreateTab({
 local Tab = Window:CreateTab({Name = "Main", Icon = ""})
 ```
 ## 🧩 Elements
-- ⚫ Dark - Default dark theme
-- ⚪ Light - Light theme
-- 🟣 Purple - Purple theme
-- 🔴 Red - Red theme
-- 🔵 Blue - Blue theme
 ## Section
 ### Uncondensed:
 ```lua
