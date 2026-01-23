@@ -20,3 +20,9 @@ local Window = Library:CreateWindow({
     AccentColor = Color3.fromRGB(255, 255, 255) -- optional
 })
 ```
+```Markdown
+| Theme | Description |
+|-------|-------------|
+| `Dark` | Dark theme (default) |
+| `Light` | Light theme |
+```
