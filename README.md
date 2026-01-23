@@ -45,3 +45,112 @@ local Tab = Window:CreateTab({
 ```lua
 Tab:CreateSection("Section Name")
 ```
+## Toggle
+```lua
+local toggle = Tab:CreateToggle({
+    Name = "Toggle",
+    Default = false,
+    Callback = function(value)
+        print(value)
+    end
+})
+
+-- Methods
+toggle:Set(true)
+toggle:Get()
+```
+## Button
+```lua
+Tab:CreateButton({
+    Name = "Button",
+    Callback = function()
+        print("Clicked!")
+    end
+})
+```
+## Slider
+```lua
+local slider = Tab:CreateSlider({
+    Name = "Slider",
+    Min = 0,
+    Max = 100,
+    Default = 50,
+    Callback = function(value)
+        print(value)
+    end
+})
+
+-- Methods
+slider:Set(75)
+```
+## Dropdown
+```lua
+local dropdown = Tab:CreateDropdown({
+    Name = "Dropdown",
+    Options = {"Option 1", "Option 2", "Option 3"},
+    Default = "Option 1",
+    Callback = function(value)
+        print(value)
+    end
+})
+
+-- Methods
+dropdown:Set("Option 2")
+dropdown:Get()
+dropdown:Refresh({"New 1", "New 2"})
+```
+## Keybind
+```lua
+local keybind = Tab:CreateKeybind({
+    Name = "Keybind",
+    Default = Enum.KeyCode.E,
+    Callback = function()
+        print("Key pressed!")
+    end
+})
+
+-- Methods
+keybind:Set(Enum.KeyCode.F)
+keybind:Get()
+```
+## Input
+```lua
+local input = Tab:CreateInput({
+    Name = "Input",
+    Placeholder = "Enter text...",
+    Callback = function(text)
+        print(text)
+    end
+})
+
+-- Methods
+input:Set("Hello")
+input:Get()
+```
+## Color Picker
+```lua
+local picker = Tab:CreateColorPicker({
+    Name = "Color",
+    Default = Color3.fromRGB(255, 255, 255),
+    Callback = function(color)
+        print(color)
+    end
+})
+
+-- Methods
+picker:Set(Color3.fromRGB(255, 0, 0))
+picker:Get()
+```
+## 🔔 Notifications
+```lua
+Library:Notify({
+    Title = "Title",
+    Text = "Message",
+    Duration = 3
+})
+```
+## ⚙️ Window Control
+```lua
+-- Destroy window
+Window:Destroy()
+```
