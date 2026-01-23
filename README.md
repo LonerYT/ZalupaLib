@@ -32,3 +32,16 @@ local Window = Library:CreateWindow({
 
 > **Blue** - Blue accent 💙
 ```
+## 📑 Creating Tab
+```lua
+local Tab = Window:CreateTab({
+    Name = "Main",
+    Icon = "" -- rbxassetid:// or empty
+})
+```
+## 🧩 Elements
+
+## Section
+```lua
+Tab:CreateSection("Section Name")
+```
