@@ -6,7 +6,7 @@
 Beautiful UI library for Roblox scripts
 
 > 🤖 This library was fully created using AI
-
+> Telegram @Sad_Loner
 ## 📦 Installation
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/LonerYT/ZalupaLib/main/Library.lua"))()
