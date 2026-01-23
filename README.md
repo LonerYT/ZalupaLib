@@ -26,17 +26,7 @@ local Window = Library:CreateWindow({
 local Window = Library:CreateWindow({Title = "Script Name", Subtitle = "v1.0", Theme = "Dark"})
 ```
 ## 🎨 Themes
-```Markdown
-> **Dark** - Dark theme with white accent (default)
 
-> **Light** - Light theme with dark accent
-
-> **Purple** - Purple vibes 💜
-
-> **Red** - Red accent ❤️
-
-> **Blue** - Blue accent 💙
-```
 ## 📑 Creating Tab
 ```lua
 local Tab = Window:CreateTab({
@@ -45,7 +35,11 @@ local Tab = Window:CreateTab({
 })
 ```
 ## 🧩 Elements
-
+- ⚫ Dark - Default dark theme
+- ⚪ Light - Light theme
+- 🟣 Purple - Purple theme
+- 🔴 Red - Red theme
+- 🔵 Blue - Blue theme
 ## Section
 ```lua
 Tab:CreateSection("Section Name")
