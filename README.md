@@ -50,6 +50,7 @@ Tab:CreateSection("Section Name")
 local Tab = Window:CreateTab({Name = "Main", Icon = ""})
 ```
 ## Toggle
+### Uncondensed:
 ```lua
 local toggle = Tab:CreateToggle({
     Name = "Toggle",
@@ -63,7 +64,12 @@ local toggle = Tab:CreateToggle({
 toggle:Set(true)
 toggle:Get()
 ```
+### Condensed:
+```lua
+local toggle = Tab:CreateToggle({Name = "Toggle", Default = false, Callback = function(value) print(value) end})
+```
 ## Button
+### Uncondensed:
 ```lua
 Tab:CreateButton({
     Name = "Button",
@@ -72,7 +78,12 @@ Tab:CreateButton({
     end
 })
 ```
+### Condensed:
+```lua
+Tab:CreateButton({Name = "Button", Callback = function() print("Clicked!") end})
+```
 ## Slider
+### Uncondensed:
 ```lua
 local slider = Tab:CreateSlider({
     Name = "Slider",
@@ -87,7 +98,12 @@ local slider = Tab:CreateSlider({
 -- Methods
 slider:Set(75)
 ```
+### Condensed:
+```lua
+local slider = Tab:CreateSlider({Name = "Slider", Min = 0, Max = 100, Default = 50, Callback = function(value) print(value) end})
+```
 ## Dropdown
+### Uncondensed:
 ```lua
 local dropdown = Tab:CreateDropdown({
     Name = "Dropdown",
@@ -103,7 +119,12 @@ dropdown:Set("Option 2")
 dropdown:Get()
 dropdown:Refresh({"New 1", "New 2"})
 ```
+### Condensed:
+```lua
+local dropdown = Tab:CreateDropdown({Name = "Dropdown", Options = {"Option 1", "Option 2"}, Default = "Option 1", Callback = function(value) print(value) end})
+```
 ## Keybind
+### Uncondensed:
 ```lua
 local keybind = Tab:CreateKeybind({
     Name = "Keybind",
@@ -117,7 +138,12 @@ local keybind = Tab:CreateKeybind({
 keybind:Set(Enum.KeyCode.F)
 keybind:Get()
 ```
+### Condensed:
+```lua
+local keybind = Tab:CreateKeybind({Name = "Keybind", Default = Enum.KeyCode.E, Callback = function() print("Key pressed!") end})
+```
 ## Input
+### Uncondensed:
 ```lua
 local input = Tab:CreateInput({
     Name = "Input",
@@ -131,7 +157,12 @@ local input = Tab:CreateInput({
 input:Set("Hello")
 input:Get()
 ```
+### Condensed:
+```lua
+local input = Tab:CreateInput({Name = "Input", Placeholder = "Enter text...", Callback = function(text) print(text) end})
+```
 ## Color Picker
+### Uncondensed:
 ```lua
 local picker = Tab:CreateColorPicker({
     Name = "Color",
@@ -145,13 +176,22 @@ local picker = Tab:CreateColorPicker({
 picker:Set(Color3.fromRGB(255, 0, 0))
 picker:Get()
 ```
+### Condensed:
+```lua
+local picker = Tab:CreateColorPicker({Name = "Color", Default = Color3.fromRGB(255, 255, 255), Callback = function(color) print(color) end})
+```
 ## 🔔 Notifications
+### Uncondensed:
 ```lua
 Library:Notify({
     Title = "Title",
     Text = "Message",
     Duration = 3
 })
+```
+### Condensed:
+```lua
+Library:Notify({Title = "Title", Text = "Message", Duration = 3})
 ```
 ## ⚙️ Window Control
 ```lua
@@ -167,3 +207,5 @@ Window:Destroy()
 - 📊 FPS and Ping in footer
 - 🌀 Ripple effect on buttons
 - 🎭 Smooth animations
+## 🤖 Author
+- Created with Claude AI
