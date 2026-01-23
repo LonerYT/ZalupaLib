@@ -12,6 +12,7 @@ Beautiful UI library for Roblox scripts
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/LonerYT/ZalupaLib/main/Library.lua"))()
 ```
 ## 🪟 Creating Window
+### Uncondensed:
 ```lua
 local Window = Library:CreateWindow({
     Title = "Script Name",
@@ -19,6 +20,10 @@ local Window = Library:CreateWindow({
     Theme = "Dark",
     AccentColor = Color3.fromRGB(255, 255, 255) -- optional
 })
+```
+### Condensed:
+```lua
+local Window = Library:CreateWindow({Title = "Script Name", Subtitle = "v1.0", Theme = "Dark"})
 ```
 ## 🎨 Themes
 ```Markdown
