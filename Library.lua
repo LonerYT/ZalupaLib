@@ -1213,12 +1213,13 @@ function Library:CreateWindow(config)
 				Get = function()
 					return selected
 				end,
-				Refresh = function(newOptions)
-					options = newOptions
-					if isOpen then closeDropdown() end
-					buildOptions()
-					SelectedLabel.Text = selected
-				end
+Refresh = function(newOptions)
+    options = newOptions
+    selected = newOptions[1] or ""
+    if isOpen then closeDropdown() end
+    buildOptions()
+    SelectedLabel.Text = selected
+end
 			}
 		end
 
