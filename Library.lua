@@ -1093,9 +1093,10 @@ function Library:CreateWindow(config)
 				BackgroundTransparency = 1,
 				Text = selected,
 				TextColor3 = Theme.Accent,
-				TextSize = 13,
+				TextSize = 11,
 				Font = Enum.Font.GothamSemibold,
 				TextXAlignment = Enum.TextXAlignment.Right,
+				TextTruncate = Enum.TextTruncate.AtEnd,
 				Parent = Container
 			})
 
@@ -1110,17 +1111,21 @@ function Library:CreateWindow(config)
 				Parent = Container
 			})
 
-			local OptionsContainer = Create("Frame", {
+			local OptionsScroll = Create("ScrollingFrame", {
 				Size = UDim2.new(1, -20, 0, 0),
 				Position = UDim2.new(0, 10, 0, 50),
 				BackgroundTransparency = 1,
+				ScrollBarThickness = 3,
+				ScrollBarImageColor3 = Theme.Accent,
+				CanvasSize = UDim2.new(0, 0, 0, 0),
+				AutomaticCanvasSize = Enum.AutomaticSize.Y,
 				Parent = Container
 			})
 
-			Create("UIListLayout", {Padding = UDim.new(0, 5), Parent = OptionsContainer})
+			local OptionsList = Create("UIListLayout", {Padding = UDim.new(0, 5), Parent = OptionsScroll})
 
 			local function getOptionsHeight()
-				return #options * 35 + math.max(0, #options - 1) * 5
+				return math.min(#options * 35 + math.max(0, #options - 1) * 5, 200)
 			end
 
 			local function closeDropdown()
@@ -1129,21 +1134,29 @@ function Library:CreateWindow(config)
 				Tween(Arrow, 0.3, {Rotation = 0})
 			end
 
+			local function openDropdown()
+				isOpen = true
+				OptionsScroll.Size = UDim2.new(1, -20, 0, getOptionsHeight())
+				Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 55 + getOptionsHeight())})
+				Tween(Arrow, 0.3, {Rotation = 180})
+			end
+
 			local function buildOptions()
-				for _, child in pairs(OptionsContainer:GetChildren()) do
+				for _, child in pairs(OptionsScroll:GetChildren()) do
 					if child:IsA("TextButton") then child:Destroy() end
 				end
 
 				for _, option in ipairs(options) do
 					local OptionBtn = Create("TextButton", {
-						Size = UDim2.new(1, 0, 0, 30),
+						Size = UDim2.new(1, -6, 0, 30),
 						BackgroundColor3 = Theme.Secondary,
 						Text = option,
 						TextColor3 = option == selected and Theme.Accent or Theme.Text,
 						TextSize = 12,
 						Font = Enum.Font.Gotham,
 						AutoButtonColor = false,
-						Parent = OptionsContainer
+						TextTruncate = Enum.TextTruncate.AtEnd,
+						Parent = OptionsScroll
 					})
 
 					Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = OptionBtn})
@@ -1151,7 +1164,7 @@ function Library:CreateWindow(config)
 					OptionBtn.MouseButton1Click:Connect(function()
 						selected = option
 						SelectedLabel.Text = option
-						for _, btn in pairs(OptionsContainer:GetChildren()) do
+						for _, btn in pairs(OptionsScroll:GetChildren()) do
 							if btn:IsA("TextButton") then
 								Tween(btn, 0.15, {TextColor3 = Theme.Text})
 							end
@@ -1169,8 +1182,6 @@ function Library:CreateWindow(config)
 						Tween(OptionBtn, 0.15, {BackgroundColor3 = Theme.Secondary})
 					end)
 				end
-
-				OptionsContainer.Size = UDim2.new(1, -20, 0, getOptionsHeight())
 			end
 
 			buildOptions()
@@ -1183,13 +1194,10 @@ function Library:CreateWindow(config)
 			})
 
 			HeaderBtn.MouseButton1Click:Connect(function()
-				isOpen = not isOpen
 				if isOpen then
-					OptionsContainer.Size = UDim2.new(1, -20, 0, getOptionsHeight())
-					Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 55 + getOptionsHeight())})
-					Tween(Arrow, 0.3, {Rotation = 180})
-				else
 					closeDropdown()
+				else
+					openDropdown()
 				end
 			end)
 
@@ -1208,18 +1216,30 @@ function Library:CreateWindow(config)
 				Set = function(value)
 					selected = value
 					SelectedLabel.Text = value
+					buildOptions()
 					callback(value)
 				end,
 				Get = function()
 					return selected
 				end,
-Refresh = function(newOptions)
-    options = newOptions
-    selected = newOptions[1] or ""
-    if isOpen then closeDropdown() end
-    buildOptions()
-    SelectedLabel.Text = selected
-end
+				Refresh = function(newOptions)
+					options = newOptions or {}
+					-- если текущий выбор больше не в списке — сбрасываем
+					local stillExists = false
+					for _, opt in ipairs(options) do
+						if opt == selected then stillExists = true break end
+					end
+					if not stillExists then
+						selected = options[1] or ""
+					end
+					SelectedLabel.Text = selected
+					buildOptions()
+					-- если открыт — пересчитать высоту
+					if isOpen then
+						OptionsScroll.Size = UDim2.new(1, -20, 0, getOptionsHeight())
+						Container.Size = UDim2.new(1, 0, 0, 55 + getOptionsHeight())
+					end
+				end
 			}
 		end
 
@@ -1282,14 +1302,18 @@ end
 				Parent = Container
 			})
 
-			local OptionsContainer = Create("Frame", {
+			local OptionsScroll = Create("ScrollingFrame", {
 				Size = UDim2.new(1, -20, 0, 0),
 				Position = UDim2.new(0, 10, 0, 50),
 				BackgroundTransparency = 1,
+				ScrollBarThickness = 3,
+				ScrollBarImageColor3 = Theme.Accent,
+				CanvasSize = UDim2.new(0, 0, 0, 0),
+				AutomaticCanvasSize = Enum.AutomaticSize.Y,
 				Parent = Container
 			})
 
-			Create("UIListLayout", {Padding = UDim.new(0, 5), Parent = OptionsContainer})
+			Create("UIListLayout", {Padding = UDim.new(0, 5), Parent = OptionsScroll})
 
 			local function getSelectedText()
 				local list = {}
@@ -1301,7 +1325,7 @@ end
 			end
 
 			local function getOptionsHeight()
-				return #options * 35 + math.max(0, #options - 1) * 5
+				return math.min(#options * 35 + math.max(0, #options - 1) * 5, 200)
 			end
 
 			local function closeDropdown()
@@ -1311,7 +1335,7 @@ end
 			end
 
 			local function buildOptions()
-				for _, child in pairs(OptionsContainer:GetChildren()) do
+				for _, child in pairs(OptionsScroll:GetChildren()) do
 					if child:IsA("Frame") then child:Destroy() end
 				end
 
@@ -1319,9 +1343,9 @@ end
 					local isSelected = selected[option] == true
 
 					local OptionFrame = Create("Frame", {
-						Size = UDim2.new(1, 0, 0, 30),
+						Size = UDim2.new(1, -6, 0, 30),
 						BackgroundColor3 = isSelected and Theme.Accent or Theme.Secondary,
-						Parent = OptionsContainer
+						Parent = OptionsScroll
 					})
 
 					Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = OptionFrame})
@@ -1372,21 +1396,8 @@ end
 						end
 						callback(result)
 					end)
-
-					OptionFrame.MouseEnter:Connect(function()
-						if not selected[option] then
-							Tween(OptionFrame, 0.15, {BackgroundColor3 = Theme.Tertiary})
-						end
-					end)
-
-					OptionFrame.MouseLeave:Connect(function()
-						if not selected[option] then
-							Tween(OptionFrame, 0.15, {BackgroundColor3 = Theme.Secondary})
-						end
-					end)
 				end
 
-				OptionsContainer.Size = UDim2.new(1, -20, 0, getOptionsHeight())
 				SelectedLabel.Text = getSelectedText()
 			end
 
@@ -1402,7 +1413,7 @@ end
 			HeaderBtn.MouseButton1Click:Connect(function()
 				isOpen = not isOpen
 				if isOpen then
-					OptionsContainer.Size = UDim2.new(1, -20, 0, getOptionsHeight())
+					OptionsScroll.Size = UDim2.new(1, -20, 0, getOptionsHeight())
 					Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 55 + getOptionsHeight())})
 					Tween(Arrow, 0.3, {Rotation = 180})
 				else
@@ -1428,7 +1439,6 @@ end
 						selected[v] = true
 					end
 					buildOptions()
-					SelectedLabel.Text = getSelectedText()
 				end,
 				Get = function()
 					local result = {}
@@ -1438,9 +1448,12 @@ end
 					return result
 				end,
 				Refresh = function(newOptions)
-					options = newOptions
-					if isOpen then closeDropdown() end
+					options = newOptions or {}
 					buildOptions()
+					if isOpen then
+						OptionsScroll.Size = UDim2.new(1, -20, 0, getOptionsHeight())
+						Container.Size = UDim2.new(1, 0, 0, 55 + getOptionsHeight())
+					end
 				end
 			}
 		end
@@ -1493,8 +1506,6 @@ end
 			KeyBtn.MouseButton1Click:Connect(function()
 				isListening = true
 				KeyBtn.Text = "..."
-				Tween(KeyBtn, 0.2, {BackgroundColor3 = Theme.Accent})
-				Tween(KeyBtn, 0.2, {TextColor3 = Theme.Background})
 			end)
 
 			UserInputService.InputBegan:Connect(function(input, processed)
@@ -1502,19 +1513,9 @@ end
 					currentKey = input.KeyCode
 					KeyBtn.Text = currentKey.Name
 					isListening = false
-					Tween(KeyBtn, 0.2, {BackgroundColor3 = Theme.Secondary})
-					Tween(KeyBtn, 0.2, {TextColor3 = Theme.Accent})
 				elseif not isListening and input.KeyCode == currentKey and not processed then
 					callback()
 				end
-			end)
-
-			Container.MouseEnter:Connect(function()
-				Tween(Container, 0.2, {BackgroundColor3 = Theme.Secondary})
-			end)
-
-			Container.MouseLeave:Connect(function()
-				Tween(Container, 0.2, {BackgroundColor3 = Theme.Tertiary})
 			end)
 
 			local element = {Name = keybindName, Container = Container, Type = "Keybind"}
@@ -1581,24 +1582,12 @@ end
 				end
 			end)
 
-			Container.MouseEnter:Connect(function()
-				Tween(Container, 0.2, {BackgroundColor3 = Theme.Secondary})
-			end)
-
-			Container.MouseLeave:Connect(function()
-				Tween(Container, 0.2, {BackgroundColor3 = Theme.Tertiary})
-			end)
-
 			local element = {Name = inputName, Container = Container, Type = "Input"}
 			table.insert(Tab.Elements, element)
 
 			return {
-				Set = function(text)
-					InputBox.Text = text
-				end,
-				Get = function()
-					return InputBox.Text
-				end
+				Set = function(text) InputBox.Text = text end,
+				Get = function() return InputBox.Text end
 			}
 		end
 
@@ -1641,21 +1630,13 @@ end
 			})
 
 			Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = ColorPreview})
-			Create("UIStroke", {Color = Theme.Stroke, Thickness = 1, Parent = ColorPreview})
 
 			local PickerContainer = Create("Frame", {
-				Size = UDim2.new(1, -20, 0, 120),
+				Size = UDim2.new(1, -20, 0, 40),
 				Position = UDim2.new(0, 10, 0, 50),
 				BackgroundTransparency = 1,
 				Visible = false,
 				Parent = Container
-			})
-
-			local RGBContainer = Create("Frame", {
-				Size = UDim2.new(1, 0, 0, 30),
-				Position = UDim2.new(0, 0, 0, 0),
-				BackgroundTransparency = 1,
-				Parent = PickerContainer
 			})
 
 			local function createRGBInput(label, posX, defaultVal)
@@ -1667,7 +1648,7 @@ end
 					TextColor3 = Theme.TextDark,
 					TextSize = 11,
 					Font = Enum.Font.GothamBold,
-					Parent = RGBContainer
+					Parent = PickerContainer
 				})
 
 				local input = Create("TextBox", {
@@ -1678,7 +1659,7 @@ end
 					TextColor3 = Theme.Text,
 					TextSize = 11,
 					Font = Enum.Font.Gotham,
-					Parent = RGBContainer
+					Parent = PickerContainer
 				})
 				Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = input})
 
@@ -1712,7 +1693,6 @@ end
 			HeaderBtn.MouseButton1Click:Connect(function()
 				isOpen = not isOpen
 				PickerContainer.Visible = isOpen
-
 				if isOpen then
 					Tween(Container, 0.3, {Size = UDim2.new(1, 0, 0, 100)})
 				else
@@ -1732,9 +1712,7 @@ end
 					BInput.Text = tostring(math.floor(color.B * 255))
 					callback(color)
 				end,
-				Get = function()
-					return currentColor
-				end
+				Get = function() return currentColor end
 			}
 		end
 
