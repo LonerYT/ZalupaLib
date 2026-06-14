@@ -1061,7 +1061,7 @@ function Library:CreateWindow(config)
     local options = config.Options or {}
     local default = config.Default or options[1] or ""
     local callback = config.Callback or function() end
-    local maxVisibleItems = config.MaxVisible or 6 -- сколько опций видно при открытии
+    local maxVisibleItems = config.MaxVisible or 6
 
     local isOpen = false
     local selected = default
@@ -1078,14 +1078,8 @@ function Library:CreateWindow(config)
     Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = Container})
     Create("UIStroke", {Color = Theme.Stroke, Thickness = 1, Transparency = 0.6, Parent = Container})
 
-    local Header = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, 45),
-        BackgroundTransparency = 1,
-        Parent = Container
-    })
-
     Create("TextLabel", {
-        Size = UDim2.new(0.45, 0, 1, 0),
+        Size = UDim2.new(0.45, 0, 0, 45),
         Position = UDim2.new(0, 16, 0, 0),
         BackgroundTransparency = 1,
         Text = dropdownName,
@@ -1093,11 +1087,11 @@ function Library:CreateWindow(config)
         TextSize = 13,
         Font = Enum.Font.Gotham,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = Header
+        Parent = Container
     })
 
     local SelectedLabel = Create("TextLabel", {
-        Size = UDim2.new(0.45, 0, 1, 0),
+        Size = UDim2.new(0.45, 0, 0, 45),
         Position = UDim2.new(0.5, 0, 0, 0),
         BackgroundTransparency = 1,
         Text = selected,
@@ -1106,92 +1100,62 @@ function Library:CreateWindow(config)
         Font = Enum.Font.GothamSemibold,
         TextXAlignment = Enum.TextXAlignment.Right,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        Parent = Header
+        Parent = Container
     })
 
     local Arrow = Create("TextLabel", {
-        Size = UDim2.new(0, 30, 1, 0),
+        Size = UDim2.new(0, 30, 0, 45),
         Position = UDim2.new(1, -35, 0, 0),
         BackgroundTransparency = 1,
-        Text = "▼",
+        Text = "v",
         TextColor3 = Theme.TextDark,
-        TextSize = 10,
+        TextSize = 14,
         Font = Enum.Font.GothamBold,
-        Parent = Header
+        Parent = Container
     })
 
-    -- Поиск
     local SearchBox = Create("TextBox", {
         Size = UDim2.new(1, -20, 0, 26),
-        Position = UDim2.new(0, 10, 0, 48),
+        Position = UDim2.new(0, 10, 0, 50),
         BackgroundColor3 = Theme.Secondary,
         Text = "",
-        PlaceholderText = "🔍 Search...",
+        PlaceholderText = "Search...",
         PlaceholderColor3 = Theme.TextDark,
         TextColor3 = Theme.Text,
         TextSize = 11,
         Font = Enum.Font.Gotham,
         ClearTextOnFocus = false,
-        Visible = false,
         Parent = Container
     })
     Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = SearchBox})
     Create("UIPadding", {PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), Parent = SearchBox})
 
-    -- Скролл-фрейм для опций
     local OptionsScroll = Create("ScrollingFrame", {
         Size = UDim2.new(1, -20, 0, 0),
-        Position = UDim2.new(0, 10, 0, 80),
-        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 10, 0, 82),
+        BackgroundColor3 = Theme.Background,
+        BackgroundTransparency = 0.5,
         ScrollBarThickness = 4,
         ScrollBarImageColor3 = Theme.Accent,
         CanvasSize = UDim2.new(0, 0, 0, 0),
         BorderSizePixel = 0,
-        Visible = false,
         Parent = Container
     })
+    Create("UICorner", {CornerRadius = UDim.new(0, 6), Parent = OptionsScroll})
 
-    local OptionsLayout = Create("UIListLayout", {
+    Create("UIListLayout", {
         Padding = UDim.new(0, itemPadding),
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = OptionsScroll
     })
 
-    local function getVisibleHeight()
-        local visibleCount = math.min(#options, maxVisibleItems)
-        return visibleCount * itemHeight + math.max(0, visibleCount - 1) * itemPadding
-    end
-
-    local function getTotalCanvasHeight()
-        return #options * itemHeight + math.max(0, #options - 1) * itemPadding
-    end
-
-    local function closeDropdown()
-        isOpen = false
-        SearchBox.Visible = false
-        OptionsScroll.Visible = false
-        Tween(Container, 0.25, {Size = UDim2.new(1, 0, 0, 45)})
-        Tween(Arrow, 0.25, {Rotation = 0})
-    end
-
-    local function openDropdown()
-        isOpen = true
-        SearchBox.Visible = true
-        OptionsScroll.Visible = true
-        local h = getVisibleHeight()
-        OptionsScroll.Size = UDim2.new(1, -20, 0, h)
-        OptionsScroll.CanvasSize = UDim2.new(0, 0, 0, getTotalCanvasHeight())
-        Tween(Container, 0.25, {Size = UDim2.new(1, 0, 0, 90 + h)})
-        Tween(Arrow, 0.25, {Rotation = 180})
-    end
-
-    local function refreshSize()
-        if isOpen then
-            local h = getVisibleHeight()
-            OptionsScroll.Size = UDim2.new(1, -20, 0, h)
-            OptionsScroll.CanvasSize = UDim2.new(0, 0, 0, getTotalCanvasHeight())
-            Container.Size = UDim2.new(1, 0, 0, 90 + h)
+    local function getVisibleCount(filter)
+        if not filter or filter == "" then return math.min(#options, maxVisibleItems) end
+        local count = 0
+        for _, opt in ipairs(options) do
+            if tostring(opt):lower():find(filter:lower(), 1, true) then count = count + 1 end
         end
+        return math.min(count, maxVisibleItems)
     end
 
     local function buildOptions(filter)
@@ -1200,11 +1164,11 @@ function Library:CreateWindow(config)
         end
 
         filter = (filter or ""):lower()
-        local visibleCount = 0
+        local totalVisible = 0
 
         for _, option in ipairs(options) do
             if filter == "" or tostring(option):lower():find(filter, 1, true) then
-                visibleCount = visibleCount + 1
+                totalVisible = totalVisible + 1
                 local OptionBtn = Create("TextButton", {
                     Size = UDim2.new(1, -6, 0, itemHeight),
                     BackgroundColor3 = option == selected and Theme.Accent or Theme.Secondary,
@@ -1222,7 +1186,6 @@ function Library:CreateWindow(config)
                 OptionBtn.MouseButton1Click:Connect(function()
                     selected = option
                     SelectedLabel.Text = tostring(option)
-                    closeDropdown()
                     callback(option)
                 end)
 
@@ -1240,8 +1203,29 @@ function Library:CreateWindow(config)
             end
         end
 
-        -- обновить canvas под отфильтрованное количество
-        OptionsScroll.CanvasSize = UDim2.new(0, 0, 0, visibleCount * itemHeight + math.max(0, visibleCount - 1) * itemPadding)
+        OptionsScroll.CanvasSize = UDim2.new(0, 0, 0, totalVisible * itemHeight + math.max(0, totalVisible - 1) * itemPadding)
+    end
+
+    local function resizeContainer()
+        if isOpen then
+            local vc = getVisibleCount(SearchBox.Text)
+            local h = vc * itemHeight + math.max(0, vc - 1) * itemPadding
+            OptionsScroll.Size = UDim2.new(1, -20, 0, h)
+            Container.Size = UDim2.new(1, 0, 0, 92 + h)
+        end
+    end
+
+    local function openDropdown()
+        isOpen = true
+        buildOptions(SearchBox.Text)
+        resizeContainer()
+        Tween(Arrow, 0.25, {Rotation = 180})
+    end
+
+    local function closeDropdown()
+        isOpen = false
+        Container.Size = UDim2.new(1, 0, 0, 45)
+        Tween(Arrow, 0.25, {Rotation = 0})
     end
 
     buildOptions()
@@ -1254,23 +1238,12 @@ function Library:CreateWindow(config)
     })
 
     HeaderBtn.MouseButton1Click:Connect(function()
-        if isOpen then
-            closeDropdown()
-        else
-            openDropdown()
-        end
+        if isOpen then closeDropdown() else openDropdown() end
     end)
 
     SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         buildOptions(SearchBox.Text)
-    end)
-
-    Container.MouseEnter:Connect(function()
-        Tween(Container, 0.2, {BackgroundColor3 = Theme.Secondary})
-    end)
-
-    Container.MouseLeave:Connect(function()
-        Tween(Container, 0.2, {BackgroundColor3 = Theme.Tertiary})
+        resizeContainer()
     end)
 
     local element = {Name = dropdownName, Container = Container, Type = "Dropdown"}
@@ -1283,21 +1256,17 @@ function Library:CreateWindow(config)
             buildOptions(SearchBox.Text)
             callback(value)
         end,
-        Get = function()
-            return selected
-        end,
+        Get = function() return selected end,
         Refresh = function(newOptions)
             options = newOptions or {}
-            local stillExists = false
-            for _, opt in ipairs(options) do
-                if opt == selected then stillExists = true break end
+            local exists = false
+            for _, o in ipairs(options) do
+                if o == selected then exists = true break end
             end
-            if not stillExists then
-                selected = options[1] or ""
-            end
+            if not exists then selected = options[1] or "" end
             SelectedLabel.Text = tostring(selected)
             buildOptions(SearchBox.Text)
-            refreshSize()
+            resizeContainer()
         end
     }
 end
